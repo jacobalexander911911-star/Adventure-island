@@ -1,0 +1,752 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Survival Island 5.0 - Online Multiplayer</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#071c28;color:white;font-family:Arial,sans-serif}
+canvas{display:block}
+#menu{position:fixed;inset:0;background:linear-gradient(#071c28dd,#071c28f5);z-index:10;display:flex;align-items:center;justify-content:center}
+.panel{background:#142d35;padding:28px;border:2px solid #5b9b78;border-radius:18px;width:min(420px,92vw);text-align:center;box-shadow:0 15px 50px #0008}
+h1{color:#83e6a1;margin:0 0 8px;font-size:32px}
+input,button{width:100%;padding:13px;margin:6px 0;border:0;border-radius:9px;font-size:16px}
+input{background:#eaf5ed;color:#142d35}
+button{background:#4caf70;color:white;font-weight:bold;cursor:pointer}
+button:hover{background:#65ca88}
+button.secondary{background:#426b80}
+#hud{position:fixed;top:12px;left:12px;z-index:3;background:#102b32dd;padding:12px;border-radius:12px;min-width:170px;line-height:1.7}
+#status{position:fixed;top:12px;right:12px;z-index:3;background:#102b32dd;padding:10px 14px;border-radius:10px}
+#help{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:3;background:#102b32dd;padding:10px 15px;border-radius:10px;text-align:center;white-space:nowrap}
+#toast{position:fixed;top:75px;left:50%;transform:translateX(-50%);z-index:8;background:#142d35;padding:12px 20px;border-radius:10px;display:none}
+#players{font-size:12px;color:#bde8ce}
+#mobile{position:fixed;bottom:75px;left:12px;z-index:4;display:none}
+#mobile button{width:52px;height:48px;padding:4px;margin:2px;background:#254e58dd}
+#actions{position:fixed;bottom:75px;right:12px;z-index:4;display:none}
+#actions button{width:65px;height:50px;margin:3px;padding:4px}
+@media(max-width:750px){#mobile,#actions{display:block}#help{font-size:11px;bottom:8px}#hud{font-size:12px;min-width:140px}#status{font-size:11px}}
+</style>
+</head>
+<body>
+
+<div id="menu">
+ <div class="panel">
+  <h1>🏝️ SURVIVAL ISLAND</h1>
+  <p>ONLINE MULTIPLAYER 5.0</p>
+  <input id="playerName" maxlength="16" placeholder="Your player name" value="Survivor">
+  <button id="createBtn">🌍 CREATE ONLINE WORLD</button>
+  <hr style="border-color:#41645a">
+  <input id="roomInput" maxlength="8" placeholder="Enter room code">
+  <button id="joinBtn" class="secondary">🚪 JOIN FRIEND'S WORLD</button>
+  <p id="menuMessage" style="font-size:13px;color:#ffd28b"></p>
+  <p style="font-size:11px;color:#b9c9c5">Online play requires your Firebase Realtime Database to be configured.</p>
+ </div>
+</div>
+
+<div id="hud">
+ <b>🏝️ SURVIVAL ISLAND</b><br>
+ ❤️ Health: <span id="health">100</span><br>
+ 🍗 Food: <span id="food">100</span><br>
+ 🪵 Wood: <span id="wood">0</span><br>
+ 🪨 Stone: <span id="stone">0</span><br>
+ <span id="players">Players: 0</span>
+</div>
+<div id="status">🔴 Not connected</div>
+<div id="toast"></div>
+<div id="help">WASD: Move · E: Collect · B: Build wall · Space: Attack</div>
+
+<div id="mobile">
+ <div style="text-align:center"><button data-key="w">▲</button></div>
+ <div><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button></div>
+</div>
+<div id="actions">
+ <button onclick="collectNearby()">COLLECT</button>
+ <button onclick="buildWall()">BUILD</button>
+ <button onclick="attack()">ATTACK</button>
+</div>
+
+<script type="module">
+import * as THREE from
+'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+
+import {initializeApp} from
+'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+
+import {
+ getDatabase,ref,set,get,update,onValue,onDisconnect,
+ runTransaction,push,remove
+} from
+'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
+
+/* --------------------------------------------------
+   FIREBASE CONFIGURATION
+   Replace DATABASE_URL with your actual RTDB URL.
+-------------------------------------------------- */
+
+const firebaseConfig = {
+ apiKey: "AIzaSyAxPBtGcURK1e7Vsb5REARfewFE4DNoYpc",
+ authDomain: "adventure-island-874fc.firebaseapp.com",
+ databaseURL: "PASTE_YOUR_REALTIME_DATABASE_URL_HERE",
+ projectId: "adventure-island-874fc",
+ storageBucket: "adventure-island-874fc.firebasestorage.app",
+ messagingSenderId: "1017449600915",
+ appId: "1:1017449600915:web:dd97c64f5cd44cdf16fa66",
+ measurementId: "G-K851DM0X7K"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const $ = id => document.getElementById(id);
+
+let roomCode = "";
+let playerId = crypto.randomUUID();
+let playerName = "Survivor";
+let connected = false;
+let inventory = {wood:0,stone:0};
+let health = 100;
+let food = 100;
+let lastSend = 0;
+let lastFood = 0;
+
+const keys = {};
+const remotePlayers = {};
+const resourceObjects = {};
+const structureObjects = {};
+
+let playerMesh;
+
+/* --------------------------------------------------
+   THREE.JS WORLD
+-------------------------------------------------- */
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x83c9e8);
+scene.fog = new THREE.Fog(0x83c9e8,45,115);
+
+const camera = new THREE.PerspectiveCamera(
+ 65,innerWidth/innerHeight,0.1,300
+);
+camera.position.set(0,9,13);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x466b42,2));
+
+const sun = new THREE.DirectionalLight(0xffffff,2.2);
+sun.position.set(-20,35,15);
+sun.castShadow = true;
+scene.add(sun);
+
+function material(color){
+ return new THREE.MeshStandardMaterial({color,roughness:1});
+}
+
+function box(x,y,z,sx,sy,sz,color,parent=scene){
+ const mesh = new THREE.Mesh(
+  new THREE.BoxGeometry(sx,sy,sz),material(color)
+ );
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+ mesh.receiveShadow=true;
+ parent.add(mesh);
+ return mesh;
+}
+
+function sphere(x,y,z,r,color,parent=scene){
+ const mesh = new THREE.Mesh(
+  new THREE.IcosahedronGeometry(r,1),material(color)
+ );
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+ parent.add(mesh);
+ return mesh;
+}
+
+const ground = new THREE.Mesh(
+ new THREE.CircleGeometry(30,48),
+ material(0x72b65d)
+);
+ground.rotation.x=-Math.PI/2;
+ground.receiveShadow=true;
+scene.add(ground);
+
+const ocean = new THREE.Mesh(
+ new THREE.CircleGeometry(150,64),
+ new THREE.MeshStandardMaterial({color:0x168cb6})
+);
+ocean.rotation.x=-Math.PI/2;
+ocean.position.y=-0.35;
+scene.add(ocean);
+
+// Extra islands
+function makeIsland(x,z,r){
+ const island = new THREE.Mesh(
+  new THREE.CylinderGeometry(r,r*0.82,2,12),
+  material(0xc5a46c)
+ );
+ island.position.set(x,-0.8,z);
+ island.castShadow=true;
+ island.receiveShadow=true;
+ scene.add(island);
+
+ const top = new THREE.Mesh(
+  new THREE.CylinderGeometry(r,r,0.3,12),
+  material(0x72b65d)
+ );
+ top.position.set(x,0.2,z);
+ scene.add(top);
+
+ for(let i=0;i<7;i++){
+  const a=i*Math.PI*2/7;
+  const tx=x+Math.cos(a)*r*0.65;
+  const tz=z+Math.sin(a)*r*0.65;
+  sphere(tx,0.5,tz,0.7,0x397e3c);
+ }
+}
+makeIsland(55,-25,15);
+makeIsland(-60,-40,18);
+makeIsland(30,65,13);
+
+// Player characters
+function makeCharacter(color){
+ const group=new THREE.Group();
+ const body=box(0,1,0,0.8,1.3,0.5,color,group);
+ const head=sphere(0,1.95,0,0.42,0xf0c39a,group);
+ box(-0.48,0.65,0,0.22,0.8,0x334b55,group);
+ box(0.48,0.65,0,0.22,0.8,0x334b55,group);
+ return {group,body,head};
+}
+
+playerMesh=makeCharacter(0x288bd0);
+scene.add(playerMesh.group);
+
+function makeTree(x,z){
+ const group=new THREE.Group();
+ const trunk=box(0,1,0,0.45,2,0.45,0x81512e,group);
+ const leaves=sphere(0,2.6,0,1.5,0x267b39,group);
+ leaves.scale.set(1,0.85,1);
+ group.position.set(x,0,z);
+ scene.add(group);
+ return group;
+}
+
+for(let i=0;i<18;i++){
+ const a=i*2.4;
+ const r=8+(i%5)*3;
+ makeTree(Math.cos(a)*r,Math.sin(a)*r);
+}
+
+/* --------------------------------------------------
+   SHARED RESOURCES
+-------------------------------------------------- */
+
+const resources = {};
+
+for(let i=0;i<12;i++){
+ const a=i*2.1;
+ const r=5+(i%4)*5;
+ resources["tree"+i]={
+  type:"wood",
+  x:Math.cos(a)*r,
+  z:Math.sin(a)*r,
+  collected:false
+ };
+}
+for(let i=0;i<9;i++){
+ const a=i*2.4+0.5;
+ const r=6+(i%4)*5;
+ resources["rock"+i]={
+  type:"stone",
+  x:Math.cos(a)*r,
+  z:Math.sin(a)*r,
+  collected:false
+ };
+}
+
+function makeResource(id,data){
+ if(resourceObjects[id]){
+  resourceObjects[id].visible=!data.collected;
+  return;
+ }
+ const group=new THREE.Group();
+ if(data.type==="wood"){
+  box(0,0.65,0,0.7,1.3,0.7,0x80512e,group);
+  sphere(0,1.45,0,0.85,0x317e38,group);
+ }else{
+  sphere(0,0.55,0,0.8,0x858b91,group);
+  sphere(0.4,0.35,0.2,0.4,0x656b73,group);
+ }
+ group.position.set(data.x,0,data.z);
+ group.visible=!data.collected;
+ scene.add(group);
+ resourceObjects[id]=group;
+}
+
+for(const [id,data] of Object.entries(resources)){
+ makeResource(id,data);
+}
+
+/* --------------------------------------------------
+   ROOM CREATION AND JOINING
+-------------------------------------------------- */
+
+function showMessage(message){
+ $("menuMessage").textContent=message;
+}
+
+function toast(message){
+ $("toast").textContent=message;
+ $("toast").style.display="block";
+ setTimeout(()=>$("toast").style.display="none",2500);
+}
+
+function generateRoomCode(){
+ return Math.random().toString(36).substring(2,8).toUpperCase();
+}
+
+async function createRoom(){
+ try{
+  playerName=$("playerName").value.trim()||"Survivor";
+  roomCode=generateRoomCode();
+
+  const roomRef=ref(db,"rooms/"+roomCode);
+
+  const initialResources={};
+  for(const [id,data] of Object.entries(resources)){
+   initialResources[id]=data;
+  }
+
+  await set(roomRef,{
+   created:Date.now(),
+   resources:initialResources,
+   players:{},
+   structures:{}
+  });
+
+  await enterRoom();
+ }catch(error){
+  console.error(error);
+  showMessage("Could not create room: "+error.message);
+ }
+}
+
+async function joinRoom(){
+ try{
+  playerName=$("playerName").value.trim()||"Survivor";
+  roomCode=$("roomInput").value.trim().toUpperCase();
+
+  if(!roomCode){
+   showMessage("Please enter a room code.");
+   return;
+  }
+
+  const roomSnapshot=await get(ref(db,"rooms/"+roomCode));
+
+  if(!roomSnapshot.exists()){
+   showMessage("That room does not exist.");
+   return;
+  }
+
+  await enterRoom();
+ }catch(error){
+  console.error(error);
+  showMessage("Could not join: "+error.message);
+ }
+}
+
+async function enterRoom(){
+ const playerRef=ref(
+  db,"rooms/"+roomCode+"/players/"+playerId
+ );
+
+ await set(playerRef,{
+  name:playerName,
+  x:0,
+  z:0,
+  health:100,
+  joined:Date.now()
+ });
+
+ await onDisconnect(playerRef).remove();
+
+ connected=true;
+
+ $("menu").style.display="none";
+ $("status").textContent="🟢 Online · Room "+roomCode;
+ toast("Joined room "+roomCode+"!");
+
+ // Listen to everyone in the room
+ onValue(
+  ref(db,"rooms/"+roomCode+"/players"),
+  snapshot=>{
+   updateRemotePlayers(snapshot.val()||{});
+  }
+ );
+
+ // Listen to shared resources
+ onValue(
+  ref(db,"rooms/"+roomCode+"/resources"),
+  snapshot=>{
+   const data=snapshot.val()||{};
+   for(const [id,item] of Object.entries(data)){
+    makeResource(id,item);
+   }
+  }
+ );
+
+ // Listen to shared structures
+ onValue(
+  ref(db,"rooms/"+roomCode+"/structures"),
+  snapshot=>{
+   updateStructures(snapshot.val()||{});
+  }
+ );
+
+/* Load the room's existing resources and structures. */
+ const roomData=await get(ref(db,"rooms/"+roomCode));
+ const data=roomData.val()||{};
+
+ if(data.resources){
+  for(const [id,item] of Object.entries(data.resources)){
+   makeResource(id,item);
+  }
+ }
+ if(data.structures){
+  updateStructures(data.structures);
+ }
+}
+
+/* --------------------------------------------------
+   REMOTE PLAYERS
+-------------------------------------------------- */
+
+function updateRemotePlayers(allPlayers){
+ const count=Object.keys(allPlayers).length;
+ $("players").textContent="Players: "+count;
+
+ for(const [id,data] of Object.entries(allPlayers)){
+  if(id===playerId)continue;
+
+  if(!remotePlayers[id]){
+   const character=makeCharacter(0xe8a43a);
+   scene.add(character.group);
+   remotePlayers[id]=character;
+  }
+
+  const character=remotePlayers[id];
+  character.group.position.x=data.x||0;
+  character.group.position.z=data.z||0;
+
+  if(data.health!==undefined){
+   character.group.userData.health=data.health;
+  }
+ }
+
+ for(const id of Object.keys(remotePlayers)){
+  if(!allPlayers[id]){
+   scene.remove(remotePlayers[id].group);
+   delete remotePlayers[id];
+  }
+ }
+}
+
+/* --------------------------------------------------
+   SHARED BUILDING
+-------------------------------------------------- */
+
+function updateStructures(allStructures){
+ for(const [id,data] of Object.entries(allStructures)){
+  if(structureObjects[id])continue;
+
+  const wall=box(
+   data.x,0.8,data.z,
+   2,1.6,0.35,
+   0x9b6a3d
+  );
+  wall.rotation.y=data.rotation||0;
+  structureObjects[id]=wall;
+ }
+}
+
+async function buildWall(){
+ if(!connected)return toast("Join an online room first!");
+ if(inventory.wood<5)return toast("You need 5 wood!");
+
+ inventory.wood-=5;
+ updateHUD();
+
+ const player=playerMesh.group.position;
+ const structureRef=push(
+  ref(db,"rooms/"+roomCode+"/structures")
+ );
+
+ try{
+  await set(structureRef,{
+   type:"wall",
+   x:player.x+Math.sin(playerMesh.group.rotation.y)*2,
+   z:player.z+Math.cos(playerMesh.group.rotation.y)*2,
+   rotation:playerMesh.group.rotation.y,
+   owner:playerId
+  });
+  toast("Wall built!");
+ }catch(error){
+  inventory.wood+=5;
+  updateHUD();
+  toast("Build failed: "+error.message);
+ }
+}
+
+/* --------------------------------------------------
+   COLLECT SHARED RESOURCES
+-------------------------------------------------- */
+
+async function collectNearby(){
+ if(!connected)return toast("Join an online room first!");
+
+ const p=playerMesh.group.position;
+ let closest=null;
+ let closestDistance=3.5;
+
+ for(const [id,data] of Object.entries(resources)){
+  const object=resourceObjects[id];
+  if(!object||!object.visible)continue;
+
+  const distance=Math.hypot(p.x-data.x,p.z-data.z);
+  if(distance<closestDistance){
+   closestDistance=distance;
+   closest=id;
+  }
+ }
+
+ if(!closest)return toast("No resources nearby!");
+
+ const resourceRef=ref(
+  db,"rooms/"+roomCode+"/resources/"+closest
+ );
+
+ try{
+  const result=await runTransaction(resourceRef,current=>{
+   if(!current||current.collected)return;
+   return {...current,collected:true,claimedBy:playerId};
+  });
+
+  if(result.committed){
+   const type=result.snapshot.val().type;
+   inventory[type]=(inventory[type]||0)+1;
+   updateHUD();
+   toast("Collected 1 "+type+"!");
+  }else{
+   toast("Someone collected that already!");
+  }
+ }catch(error){
+  toast("Collection failed: "+error.message);
+ }
+}
+
+/* --------------------------------------------------
+   COMBAT
+-------------------------------------------------- */
+
+let attacking=false;
+
+function attack(){
+ if(!connected)return;
+ if(attacking)return;
+
+ attacking=true;
+ playerMesh.body.rotation.x=-0.8;
+ toast("⚔️ Attack!");
+
+ setTimeout(()=>{
+  playerMesh.body.rotation.x=0;
+  attacking=false;
+ },350);
+
+ // Basic local animation only. Server-side enemy combat
+ // is not implemented in this multiplayer foundation.
+}
+
+/* --------------------------------------------------
+   MOVEMENT AND NETWORK UPDATES
+-------------------------------------------------- */
+
+function updateHUD(){
+ $("health").textContent=health;
+ $("food").textContent=food;
+ $("wood").textContent=inventory.wood;
+ $("stone").textContent=inventory.stone;
+}
+
+function sendPosition(){
+ if(!connected)return;
+
+ const p=playerMesh.group.position;
+
+ update(
+  ref(db,"rooms/"+roomCode+"/players/"+playerId),
+  {
+   x:p.x,
+   z:p.z,
+   health:health,
+   food:food,
+   updated:Date.now()
+  }
+ ).catch(error=>console.error("Position update failed",error));
+}
+
+function movePlayer(dt){
+ let dx=0,dz=0;
+
+ if(keys.w||keys.arrowup)dz-=1;
+ if(keys.s||keys.arrowdown)dz+=1;
+ if(keys.a||keys.arrowleft)dx-=1;
+ if(keys.d||keys.arrowright)dx+=1;
+
+ if(dx||dz){
+  const length=Math.hypot(dx,dz);
+  dx/=length;
+  dz/=length;
+
+  const speed=7;
+  playerMesh.group.position.x+=dx*speed*dt;
+  playerMesh.group.position.z+=dz*speed*dt;
+
+  playerMesh.group.rotation.y=Math.atan2(dx,dz);
+ }
+
+ // Keep the starter island playable
+ const distance=Math.hypot(
+  playerMesh.group.position.x,
+  playerMesh.group.position.z
+ );
+
+ if(distance>29){
+  playerMesh.group.position.x*=29/distance;
+  playerMesh.group.position.z*=29/distance;
+ }
+}
+
+window.addEventListener("keydown",event=>{
+ keys[event.key.toLowerCase()]=true;
+
+ if(event.key.toLowerCase()==="e")collectNearby();
+ if(event.key.toLowerCase()==="b")buildWall();
+ if(event.code==="Space"){
+  event.preventDefault();
+  attack();
+ }
+});
+
+window.addEventListener("keyup",event=>{
+ keys[event.key.toLowerCase()]=false;
+});
+
+document.querySelectorAll("[data-key]").forEach(button=>{
+ const key=button.dataset.key;
+
+ button.addEventListener("pointerdown",event=>{
+  event.preventDefault();
+  keys[key]=true;
+ });
+
+ button.addEventListener("pointerup",()=>keys[key]=false);
+ button.addEventListener("pointerleave",()=>keys[key]=false);
+ button.addEventListener("pointercancel",()=>keys[key]=false);
+});
+
+/* --------------------------------------------------
+   DAY AND NIGHT
+-------------------------------------------------- */
+
+let worldTime=0;
+
+function updateDayNight(dt){
+ worldTime+=dt*0.04;
+
+ const brightness=0.45+
+  (Math.sin(worldTime)+1)*0.5*0.65;
+
+ sun.intensity=brightness*2;
+ scene.background.setHSL(
+  0.55,
+  0.45,
+  0.25+brightness*0.25
+ );
+}
+
+/* --------------------------------------------------
+   GAME LOOP
+-------------------------------------------------- */
+
+const clock=new THREE.Clock();
+
+function animate(){
+ requestAnimationFrame(animate);
+
+ const dt=Math.min(clock.getDelta(),0.05);
+
+ if(connected){
+  movePlayer(dt);
+
+  const p=playerMesh.group.position;
+
+  camera.position.lerp(
+   new THREE.Vector3(p.x,p.y+8,p.z+12),
+   0.08
+  );
+
+  camera.lookAt(p.x,p.y+0.5,p.z);
+
+  if(performance.now()-lastSend>120){
+   lastSend=performance.now();
+   sendPosition();
+  }
+
+  if(performance.now()-lastFood>10000){
+   lastFood=performance.now();
+   food=Math.max(0,food-1);
+   if(food===0)health=Math.max(0,health-1);
+   updateHUD();
+  }
+ }
+
+ updateDayNight(dt);
+ renderer.render(scene,camera);
+}
+
+animate();
+
+/* --------------------------------------------------
+   BUTTONS AND RESIZE
+-------------------------------------------------- */
+
+$("createBtn").addEventListener("click",createRoom);
+$("joinBtn").addEventListener("click",joinRoom);
+
+window.collectNearby=collectNearby;
+window.buildWall=buildWall;
+window.attack=attack;
+
+window.addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+
+updateHUD();
+
+if(firebaseConfig.databaseURL.includes("PASTE_")){
+ showMessage("Add your Realtime Database URL in the code before playing.");
+ $("status").textContent="🟠 Database URL missing";
+}
+</script>
+</body>
+</html>
