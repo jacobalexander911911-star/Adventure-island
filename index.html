@@ -4,52 +4,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Survival Island</title>
+<title>Survival Island 4.0</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#102536;color:white;font-family:Arial,sans-serif}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#168fc1;color:white;font-family:Arial,sans-serif;touch-action:none}
 button,input{font:inherit}
-button{border:0;border-radius:9px;padding:11px;background:#258c54;color:white;font-weight:bold;cursor:pointer}
-input{width:100%;padding:11px;border:1px solid #536779;border-radius:8px;background:#102435;color:white;margin:5px 0 9px}
+button{border:0;border-radius:10px;padding:11px;background:#238b50;color:white;font-weight:bold;cursor:pointer}
+input{width:100%;padding:11px;border:1px solid #637c8c;border-radius:8px;background:#102435;color:white;margin:5px 0 9px}
 #game{position:fixed;inset:0}
-#screen{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:#061827eF;overflow:auto;padding:12px}
+#screen{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#061827ed;overflow:auto;padding:12px}
 .panel{width:min(450px,96vw);max-height:95vh;overflow:auto;padding:22px;background:#102638;border:1px solid #456274;border-radius:17px}
 h1{font-size:32px;margin:0 0 7px;color:#8be5a7}
 h2{font-size:18px;margin:17px 0 8px}
 .small{font-size:12px;color:#b8cbd6;line-height:1.5}
 .row{display:flex;gap:8px}
 .row>*{flex:1}
-#loginError{color:#ffaaaa;min-height:20px;font-size:12px;margin-top:7px}
+#loginError{color:#ffaaaa;min-height:25px;font-size:12px;margin-top:7px;line-height:1.5}
 #worldMenu{display:none}
-#status{position:fixed;top:10px;left:10px;z-index:3;background:#071522dd;padding:10px 13px;border-radius:10px;font-size:12px;line-height:1.7;pointer-events:none}
-#help{position:fixed;top:10px;right:10px;z-index:3;background:#071522dd;padding:10px;border-radius:10px;font-size:11px;line-height:1.6;pointer-events:none}
-#toast{position:fixed;top:95px;left:50%;transform:translateX(-50%);z-index:8;background:#102638ed;padding:10px 16px;border-radius:10px;display:none;max-width:90vw;text-align:center}
-#actions{position:fixed;right:15px;bottom:18px;z-index:4;display:grid;grid-template-columns:repeat(2,65px);gap:7px}
-#actions button{height:52px;padding:3px;background:#164c3be8;border:1px solid #a6e6bd;font-size:12px}
-#joystick{position:fixed;left:20px;bottom:22px;width:130px;height:130px;border-radius:50%;background:#ffffff24;border:2px solid #ffffff66;z-index:4;touch-action:none}
-#stick{position:absolute;left:40px;top:40px;width:48px;height:48px;border-radius:50%;background:#ffffffa8;pointer-events:none}
-#hudButtons{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:4;display:flex;gap:6px}
+#status{position:fixed;top:10px;left:10px;z-index:4;background:#071522dd;padding:10px 13px;border-radius:10px;font-size:12px;line-height:1.7;pointer-events:none}
+#help{position:fixed;top:10px;right:10px;z-index:4;background:#071522dd;padding:10px;border-radius:10px;font-size:11px;line-height:1.6;pointer-events:none}
+#toast{position:fixed;top:100px;left:50%;transform:translateX(-50%);z-index:12;background:#102638ed;padding:10px 16px;border-radius:10px;display:none;max-width:90vw;text-align:center}
+#actions{position:fixed;right:14px;bottom:18px;z-index:5;display:grid;grid-template-columns:repeat(2,66px);gap:7px}
+#actions button{height:53px;padding:3px;background:#164c3be8;border:1px solid #a6e6bd;font-size:12px;touch-action:none}
+#joystick{position:fixed;left:17px;bottom:22px;width:132px;height:132px;border-radius:50%;background:#ffffff35;border:2px solid #ffffff99;z-index:5;touch-action:none}
+#stick{position:absolute;left:40px;top:40px;width:48px;height:48px;border-radius:50%;background:#ffffffd0;pointer-events:none}
+#hudButtons{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:5;display:flex;gap:6px}
 #hudButtons button{font-size:11px;padding:8px 10px;background:#183b55ed}
-#chatBox{position:fixed;left:10px;bottom:10px;z-index:5;width:min(290px,55vw);background:#071522dd;border-radius:10px;padding:8px}
-#chatMessages{height:90px;overflow:auto;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
-#chatInput{width:100%;margin:4px 0 0;padding:8px}
+#chatBox{position:fixed;left:10px;bottom:10px;z-index:6;width:min(290px,45vw);background:#071522dd;border-radius:10px;padding:8px}
+#chatMessages{height:75px;overflow:auto;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+#chatInput{width:100%;margin:4px 0 0;padding:8px;touch-action:auto}
 #chatSend{padding:8px}
-@media(hover:hover) and (pointer:fine){#joystick,#actions{display:none}}
 @media(max-width:650px){
- #help{top:auto;bottom:160px;right:8px;font-size:10px}
- #status{font-size:11px}
- #hudButtons{bottom:4px}
- #hudButtons button{padding:7px;font-size:10px}
- #chatBox{bottom:150px;width:43vw}
- #chatMessages{height:55px}
+ #help{top:auto;bottom:170px;right:7px;font-size:10px}
+ #status{font-size:10px;padding:8px}
+ #chatBox{bottom:160px;width:42vw}
+ #chatMessages{height:48px}
+ #hudButtons{bottom:3px}
+ #hudButtons button{font-size:10px;padding:7px}
+ #actions{right:9px;bottom:17px;grid-template-columns:repeat(2,58px)}
+ #actions button{height:48px;font-size:11px}
+ #joystick{width:116px;height:116px;left:12px;bottom:18px}
+ #stick{left:34px;top:34px}
 }
 </style>
 </head>
 <body>
+
 <div id="game"></div>
 
 <div id="status">
- <b>🏝️ SURVIVAL ISLAND</b><br>
+ <b>🏝️ SURVIVAL ISLAND 4.0</b><br>
  <span id="playerStatus">Not connected</span><br>
  ❤️ <span id="health">100</span> |
  🍗 <span id="hunger">100</span><br>
@@ -63,13 +67,16 @@ h2{font-size:18px;margin:17px 0 8px}
  WASD / arrows: Move<br>
  E: Collect<br>
  Space: Attack<br>
- B: Build wall<br>
+ B: Build<br>
  V: Boat<br>
  C: Cave
 </div>
 
 <div id="toast"></div>
-<div id="joystick"><div id="stick"></div></div>
+
+<div id="joystick">
+ <div id="stick"></div>
+</div>
 
 <div id="actions">
  <button id="collectBtn">Collect</button>
@@ -98,7 +105,7 @@ h2{font-size:18px;margin:17px 0 8px}
 <div id="screen">
  <div class="panel">
   <h1>🏝️ Survival Island</h1>
-  <p class="small">Explore islands, collect resources, build shelters and survive together online.</p>
+  <p class="small">Explore a huge island world. Collect resources, discover caves, build shelters and survive with friends.</p>
 
   <h2>Sign in</h2>
   <button id="googleBtn" style="width:100%;background:#f5f5f5;color:#222">Continue with Google</button>
@@ -106,11 +113,15 @@ h2{font-size:18px;margin:17px 0 8px}
   <h2>Email account</h2>
   <input id="email" type="email" placeholder="Email address" autocomplete="email">
   <input id="password" type="password" placeholder="Password (at least 6 characters)" autocomplete="current-password">
+
   <div class="row">
    <button id="loginBtn">Log in</button>
    <button id="registerBtn" style="background:#3974b9">Register</button>
   </div>
-  <button id="guestBtn" style="width:100%;margin-top:8px;background:#657b89">Play as guest</button>
+
+  <button id="resendBtn" style="width:100%;margin-top:7px;background:#8b6930">Resend verification email</button>
+  <button id="guestBtn" style="width:100%;margin-top:7px;background:#657b89">Play as guest</button>
+
   <div id="loginError"></div>
 
   <div id="worldMenu">
@@ -134,7 +145,7 @@ import {initializeApp}
 import {
  getAuth,GoogleAuthProvider,signInWithPopup,signInAnonymously,
  createUserWithEmailAndPassword,signInWithEmailAndPassword,
- onAuthStateChanged
+ sendEmailVerification,reload,onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 import {
@@ -142,9 +153,9 @@ import {
  remove,push,runTransaction
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-/* FIREBASE */
+/* FIREBASE CONFIG */
 const firebaseConfig={
- apiKey:"AIzaSyAxPBtGcURK1e7Vsb5REARfewFE4DNoYpc",
+ apiKey:"AIzaSyAxPBtGcUR1K1e7Vsb5REARfewFE4DNoYpc",
  authDomain:"adventure-island-874fc.firebaseapp.com",
  databaseURL:"https://adventure-island-874fc-default-rtdb.firebaseio.com",
  projectId:"adventure-island-874fc",
@@ -159,12 +170,19 @@ const auth=getAuth(app);
 const db=getDatabase(app);
 const $=id=>document.getElementById(id);
 
-let user=null,roomCode="",playerName="Survivor";
-let playing=false,playerRef=null;
+let user=null;
+let roomCode="";
+let playerName="Survivor";
+let playing=false;
+let playerRef=null;
 let stopPlayers=null,stopWorld=null,stopChat=null;
-let wood=0,stone=0,food=0,health=100,hunger=100;
+
+let wood=0,stone=0,food=0;
+let health=100,hunger=100;
 let speed=7,inBoat=false,inCave=false;
 let lastSend=0,lastDamage=0,elapsed=0;
+let worldReady=false;
+
 const remoteMeshes=new Map();
 const resourceMeshes=new Map();
 const buildingMeshes=new Map();
@@ -174,25 +192,30 @@ function toast(message){
  el.textContent=message;
  el.style.display="block";
  clearTimeout(toast.timer);
- toast.timer=setTimeout(()=>el.style.display="none",2400);
+ toast.timer=setTimeout(()=>el.style.display="none",2500);
 }
-function showError(message){$("loginError").textContent=message||""}
+
+function showError(message){
+ $("loginError").textContent=message||"";
+}
+
 function explainError(e){
  const messages={
-  "auth/operation-not-allowed":"Enable this login provider in Firebase Authentication.",
-  "auth/unauthorized-domain":"Add your hosting domain to Firebase Authorized domains.",
-  "auth/popup-blocked":"Allow popups or open the game in a new browser tab.",
-  "auth/email-already-in-use":"That email already has an account. Please log in.",
+  "auth/operation-not-allowed":"Enable this login method in Firebase Authentication.",
+  "auth/unauthorized-domain":"Add your website domain to Firebase Authorized domains.",
+  "auth/popup-blocked":"Allow popups or open the game in a new tab.",
+  "auth/email-already-in-use":"This email already has an account. Log in instead.",
   "auth/weak-password":"Password must be at least 6 characters.",
   "auth/invalid-credential":"Email or password is incorrect.",
   "auth/invalid-email":"Enter a valid email address.",
-  "auth/configuration-not-found":"Check Firebase Authentication provider settings.",
-  "auth/network-request-failed":"Check your internet connection."
+  "auth/configuration-not-found":"Check Firebase Authentication settings.",
+  "auth/network-request-failed":"Check your internet connection.",
+  "PERMISSION_DENIED":"Firebase database rules blocked this action."
  };
  return messages[e.code]||e.message||"Something went wrong.";
 }
 
-/* LOGIN */
+/* AUTHENTICATION */
 $("googleBtn").onclick=async()=>{
  try{
   showError("");
@@ -212,9 +235,42 @@ $("loginBtn").onclick=async()=>{
 $("registerBtn").onclick=async()=>{
  try{
   showError("");
-  await createUserWithEmailAndPassword(
-   auth,$("email").value.trim(),$("password").value
+  const email=$("email").value.trim();
+  const password=$("password").value;
+
+  if(!email||!password){
+   showError("Enter your email and password.");
+   return;
+  }
+
+  const result=await createUserWithEmailAndPassword(
+   auth,email,password
   );
+
+  await sendEmailVerification(result.user);
+
+  showError(
+   "Verification email sent! Check your inbox and spam folder. Verify before joining an island."
+  );
+ }catch(e){showError(explainError(e));}
+};
+
+$("resendBtn").onclick=async()=>{
+ try{
+  if(!auth.currentUser){
+   showError("Log in to your email account first.");
+   return;
+  }
+
+  await reload(auth.currentUser);
+
+  if(auth.currentUser.emailVerified){
+   showError("Your email is already verified!");
+   return;
+  }
+
+  await sendEmailVerification(auth.currentUser);
+  showError("A new verification email has been sent.");
  }catch(e){showError(explainError(e));}
 };
 
@@ -228,57 +284,77 @@ $("guestBtn").onclick=async()=>{
 onAuthStateChanged(auth,currentUser=>{
  user=currentUser;
  $("worldMenu").style.display=user?"block":"none";
+
  if(user){
   $("playerName").value=
    user.displayName||user.email?.split("@")[0]||"Survivor";
-  showError("Signed in. Create an island or join a friend.");
+
+  if(user.email&&!user.emailVerified){
+   showError("Account signed in. Please verify your email before entering an island.");
+  }else{
+   showError("Signed in! Create an island or join a friend.");
+  }
  }
 });
 
-/* THREE.JS SCENE */
+/* THREE.JS RENDERER */
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x83c8e8);
-scene.fog=new THREE.Fog(0x83c8e8,45,150);
+scene.background=new THREE.Color(0x87ceeb);
+scene.fog=new THREE.Fog(0x87ceeb,65,180);
 
 const camera=new THREE.PerspectiveCamera(
- 70,innerWidth/innerHeight,.1,300
+ 65,innerWidth/innerHeight,.1,500
 );
-camera.position.set(0,8,12);
+camera.position.set(0,9,12);
 
-const renderer=new THREE.WebGLRenderer({antialias:true});
+const renderer=new THREE.WebGLRenderer({
+ antialias:true,
+ powerPreference:"high-performance"
+});
 renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
 $("game").appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xdaf5ff,0x42613b,2));
+scene.add(new THREE.HemisphereLight(0xdaf5ff,0x50633d,2));
 
-const sun=new THREE.DirectionalLight(0xffffff,2.2);
-sun.position.set(-25,40,20);
+const sun=new THREE.DirectionalLight(0xffffff,2);
+sun.position.set(-35,60,30);
 sun.castShadow=true;
 sun.shadow.mapSize.set(1024,1024);
+sun.shadow.camera.left=-100;
+sun.shadow.camera.right=100;
+sun.shadow.camera.top=100;
+sun.shadow.camera.bottom=-100;
 scene.add(sun);
-
-const material=color=>new THREE.MeshStandardMaterial({
- color,roughness:1
-});
-
-const grass=material(0x55a943);
-const sand=material(0xd9c17c);
-const woodMaterial=material(0x80502b);
-const leaves=material(0x277b36);
-const rockMaterial=material(0x858b8e);
-const waterMaterial=new THREE.MeshStandardMaterial({
- color:0x168fbd,roughness:.35
-});
 
 const world=new THREE.Group();
 scene.add(world);
 
-function makeBox(parent,x,y,z,sx,sy,sz,mat){
+function mat(color,roughness=1){
+ return new THREE.MeshStandardMaterial({color,roughness});
+}
+
+const grass=mat(0x4c9e37);
+const lightGrass=mat(0x6bb747);
+const sand=mat(0xd9bd7b);
+const darkSand=mat(0xb99558);
+const rockMat=mat(0x747b7e);
+const darkRock=mat(0x3c4649);
+const woodMat=mat(0x81502b);
+const leavesMat=mat(0x27743a);
+const lightLeaves=mat(0x3b9145);
+const waterMat=new THREE.MeshStandardMaterial({
+ color:0x148fc0,
+ roughness:.28,
+ metalness:.05
+});
+
+function addBox(parent,x,y,z,sx,sy,sz,material){
  const mesh=new THREE.Mesh(
-  new THREE.BoxGeometry(sx,sy,sz),mat
+  new THREE.BoxGeometry(sx,sy,sz),material
  );
  mesh.position.set(x,y,z);
  mesh.castShadow=true;
@@ -287,9 +363,22 @@ function makeBox(parent,x,y,z,sx,sy,sz,mat){
  return mesh;
 }
 
-function makeCylinder(parent,x,y,z,r1,r2,h,mat){
+function addCylinder(parent,x,y,z,rTop,rBottom,height,material,segments=10){
  const mesh=new THREE.Mesh(
-  new THREE.CylinderGeometry(r1,r2,h,8),mat
+  new THREE.CylinderGeometry(
+   rTop,rBottom,height,segments
+  ),material
+ );
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+ mesh.receiveShadow=true;
+ parent.add(mesh);
+ return mesh;
+}
+
+function addSphere(parent,x,y,z,radius,material){
+ const mesh=new THREE.Mesh(
+  new THREE.SphereGeometry(radius,12,10),material
  );
  mesh.position.set(x,y,z);
  mesh.castShadow=true;
@@ -297,71 +386,183 @@ function makeCylinder(parent,x,y,z,r1,r2,h,mat){
  return mesh;
 }
 
+/* OCEAN */
 const water=new THREE.Mesh(
- new THREE.PlaneGeometry(300,300),waterMaterial
+ new THREE.PlaneGeometry(500,500,40,40),
+ waterMat
 );
 water.rotation.x=-Math.PI/2;
-water.position.y=-.7;
+water.position.y=-.2;
 world.add(water);
 
-function makeIsland(x,z,r){
- const group=new THREE.Group();
- group.position.set(x,0,z);
- world.add(group);
+/* TERRAIN */
+function makeIsland(cx,cz,radius,seed=0){
+ const island=new THREE.Group();
+ island.position.set(cx,0,cz);
+ world.add(island);
 
- const base=new THREE.Mesh(
-  new THREE.CylinderGeometry(r*.83,r,r*.35,12),sand
+ // The base is deliberately shallow so it does not bury the grass.
+ const base=addCylinder(
+  island,0,-.95,0,
+  radius*.78,radius*.94,2.1,sand,32
  );
- base.position.y=-.1;
- base.receiveShadow=true;
- group.add(base);
 
- const top=new THREE.Mesh(
-  new THREE.CylinderGeometry(r*.78,r*.83,.65,12),grass
+ // Wide grassy top.
+ const top=addCylinder(
+  island,0,.02,0,
+  radius*.78,radius*.78,.38,grass,32
  );
- top.position.y=.23;
- top.receiveShadow=true;
- group.add(top);
+
+ // A second grass surface for a more natural colour.
+ const inner=addCylinder(
+  island,0,.215,0,
+  radius*.69,radius*.69,.035,lightGrass,32
+ );
+
+ // Small raised central hill.
+ const hill=addCylinder(
+  island,0,.65,0,
+  radius*.22,radius*.31,.85,grass,16
+ );
+ hill.scale.z=.75;
+
+ // Beach rocks around the coast.
+ for(let i=0;i<Math.floor(radius*.45);i++){
+  const a=Math.random()*Math.PI*2;
+  const d=radius*(.78+Math.random()*.12);
+  const rock=addSphere(
+   island,Math.cos(a)*d,.1,Math.sin(a)*d,
+   .3+Math.random()*.5,rockMat
+  );
+  rock.scale.y=.65;
+ }
+
+ return island;
 }
 
-makeIsland(0,0,24);
-makeIsland(48,-24,14);
-makeIsland(-48,32,17);
-makeIsland(12,68,12);
+makeIsland(0,0,30);
+makeIsland(60,-25,18);
+makeIsland(-58,35,21);
+makeIsland(15,76,15);
+makeIsland(-85,-60,13);
+makeIsland(92,65,16);
 
-function randomPoint(radius){
+/* DECORATION */
+function pointOnIsland(cx,cz,r){
  const a=Math.random()*Math.PI*2;
- const d=Math.sqrt(Math.random())*radius;
- return {x:Math.cos(a)*d,z:Math.sin(a)*d};
+ const d=Math.sqrt(Math.random())*r;
+ return {
+  x:cx+Math.cos(a)*d,
+  z:cz+Math.sin(a)*d
+ };
 }
 
-/* PLAYER */
+function makeTree(x,z,scale=1){
+ const tree=new THREE.Group();
+ tree.position.set(x,.23,z);
+ tree.scale.setScalar(scale);
+
+ addCylinder(tree,0,1,0,.25,.35,2,woodMat,8);
+
+ const crown1=new THREE.Mesh(
+  new THREE.ConeGeometry(1.4,2.4,8),leavesMat
+ );
+ crown1.position.y=2.55;
+ crown1.castShadow=true;
+ tree.add(crown1);
+
+ const crown2=new THREE.Mesh(
+  new THREE.ConeGeometry(1.05,1.8,8),lightLeaves
+ );
+ crown2.position.y=3.15;
+ crown2.castShadow=true;
+ tree.add(crown2);
+
+ world.add(tree);
+ return tree;
+}
+
+function makeBush(x,z){
+ const bush=new THREE.Group();
+ bush.position.set(x,.35,z);
+ addSphere(bush,-.35,0,0,.55,leavesMat);
+ addSphere(bush,.3,.05,0,.6,lightLeaves);
+ addSphere(bush,0,.3,.25,.55,leavesMat);
+ world.add(bush);
+}
+
+function makeRock(x,z,scale=1){
+ const rock=new THREE.Mesh(
+  new THREE.DodecahedronGeometry(.8,0),rockMat
+ );
+ rock.position.set(x,.45,z);
+ rock.scale.set(scale*1.2,scale*.8,scale);
+ rock.castShadow=true;
+ rock.receiveShadow=true;
+ world.add(rock);
+ return rock;
+}
+
+const decorationAreas=[
+ [0,0,25,24],
+ [60,-25,14,12],
+ [-58,35,17,15],
+ [15,76,11,10],
+ [-85,-60,9,8],
+ [92,65,12,11]
+];
+
+for(const [cx,cz,r,trees] of decorationAreas){
+ for(let i=0;i<trees;i++){
+  const p=pointOnIsland(cx,cz,r*.85);
+  makeTree(p.x,p.z,.75+Math.random()*.55);
+ }
+
+ for(let i=0;i<Math.floor(r*.7);i++){
+  const p=pointOnIsland(cx,cz,r*.9);
+  makeBush(p.x,p.z);
+ }
+
+ for(let i=0;i<Math.floor(r*.4);i++){
+  const p=pointOnIsland(cx,cz,r*.9);
+  makeRock(p.x,p.z,.6+Math.random()*.8);
+ }
+}
+
+/* PLAYER CHARACTER */
 const player=new THREE.Group();
-
-makeBox(player,0,1.05,0,.8,1.2,.45,material(0x3276d2));
-
-const playerHead=new THREE.Mesh(
- new THREE.SphereGeometry(.36,12,10),material(0xe8b98c)
-);
-playerHead.position.y=1.9;
-player.add(playerHead);
-
-makeBox(player,-.23,.35,0,.25,.7,.3,material(0x26384e));
-makeBox(player,.23,.35,0,.25,.7,.3,material(0x26384e));
-
+player.position.set(0,.25,0);
 world.add(player);
-player.position.set(0,.5,0);
+
+const playerBody=addBox(
+ player,0,1.15,0,.85,1.15,.5,mat(0x2677d4)
+);
+const playerHead=addSphere(
+ player,0,1.95,0,.38,mat(0xe8b98c)
+);
+addBox(player,-.25,.35,0,.25,.7,.3,mat(0x26384e));
+addBox(player,.25,.35,0,.25,.7,.3,mat(0x26384e));
+addBox(player,-.55,1.15,0,.2,.8,.25,mat(0xe8b98c));
+addBox(player,.55,1.15,0,.2,.8,.25,mat(0xe8b98c));
+
+player.traverse(o=>{
+ if(o.isMesh){
+  o.castShadow=true;
+  o.frustumCulled=false;
+ }
+});
 
 /* RESOURCES */
-function createTree(id,x,z){
+function createResourceTree(id,x,z){
  const group=new THREE.Group();
- group.position.set(x,.5,z);
- makeCylinder(group,0,1,0,.28,.38,2,woodMaterial);
+ group.position.set(x,.25,z);
+
+ addCylinder(group,0,1,0,.25,.32,2,woodMat,8);
 
  const crown=new THREE.Mesh(
-  new THREE.ConeGeometry(1.25,2.3,7),leaves
+  new THREE.ConeGeometry(1.2,2.2,8),leavesMat
  );
- crown.position.y=2.65;
+ crown.position.y=2.5;
  crown.castShadow=true;
  group.add(crown);
 
@@ -369,59 +570,149 @@ function createTree(id,x,z){
  resourceMeshes.set(id,group);
 }
 
-function createRock(id,x,z){
+function createResourceRock(id,x,z){
  const mesh=new THREE.Mesh(
-  new THREE.DodecahedronGeometry(.85,0),rockMaterial
+  new THREE.DodecahedronGeometry(.8,0),rockMat
  );
- mesh.position.set(x,.7,z);
- mesh.scale.set(1.2,.8,.9);
+ mesh.position.set(x,.55,z);
+ mesh.scale.set(1.2,.8,1);
  mesh.castShadow=true;
  world.add(mesh);
  resourceMeshes.set(id,mesh);
 }
 
-function displayResource(id,data){
+function showResource(id,data){
  if(!data)return;
+
  let mesh=resourceMeshes.get(id);
 
  if(!mesh){
-  if(data.type==="wood")createTree(id,data.x,data.z);
-  else createRock(id,data.x,data.z);
+  if(data.type==="wood"){
+   createResourceTree(id,data.x,data.z);
+  }else{
+   createResourceRock(id,data.x,data.z);
+  }
   mesh=resourceMeshes.get(id);
  }
+
  mesh.visible=(data.amount||0)>0;
 }
 
 function generateResources(){
- const result={};
+ const resources={};
+ const areas=[
+  [0,0,24,22],
+  [60,-25,14,12],
+  [-58,35,16,14],
+  [15,76,10,9]
+ ];
 
- for(let i=0;i<26;i++){
-  const p=randomPoint(20);
-  result["tree_"+i]={
-   type:"wood",x:p.x,z:p.z,amount:3
-  };
- }
+ let count=0;
 
- for(let i=0;i<14;i++){
-  const p=randomPoint(20);
-  result["rock_"+i]={
-   type:"stone",x:p.x,z:p.z,amount:2
-  };
- }
+ for(const [cx,cz,r,number] of areas){
+  for(let i=0;i<number;i++){
+   const p=pointOnIsland(cx,cz,r);
+   resources["tree_"+count++]={
+    type:"wood",x:p.x,z:p.z,amount:3
+   };
+  }
 
- for(const [cx,cz,r,count] of [
-  [48,-24,11,9],[-48,32,14,12],[12,68,9,7]
- ]){
-  for(let i=0;i<count;i++){
-   const p=randomPoint(r);
-   const id="tree_"+Object.keys(result).length;
-   result[id]={
-    type:"wood",x:cx+p.x,z:cz+p.z,amount:3
+  for(let i=0;i<Math.floor(number*.6);i++){
+   const p=pointOnIsland(cx,cz,r);
+   resources["rock_"+count++]={
+    type:"stone",x:p.x,z:p.z,amount:2
    };
   }
  }
- return result;
+ return resources;
 }
+
+/* CAVES */
+const caves=[];
+
+function makeCave(x,z){
+ const cave=new THREE.Group();
+ cave.position.set(x,.3,z);
+ world.add(cave);
+
+ const entrance=addCylinder(
+  cave,0,1.3,0,2.3,2.8,2.5,rockMat,10
+ );
+ entrance.scale.set(1.5,1,1);
+
+ const opening=new THREE.Mesh(
+  new THREE.CircleGeometry(1.35,16),
+  mat(0x10151a)
+ );
+ opening.position.set(0,1.1,2.25);
+ cave.add(opening);
+
+ const roof=new THREE.Mesh(
+  new THREE.DodecahedronGeometry(2.4,1),darkRock
+ );
+ roof.position.set(0,3,0);
+ roof.scale.set(1.4,.65,1);
+ roof.castShadow=true;
+ cave.add(roof);
+
+ const light=new THREE.PointLight(0xffa34d,2,12);
+ light.position.set(0,1.5,3);
+ cave.add(light);
+
+ caves.push({group:cave,x,z});
+ return cave;
+}
+
+makeCave(-12,-20);
+makeCave(58,-29);
+makeCave(-62,36);
+
+/* UNDERGROUND CAVE ROOM */
+const caveInterior=new THREE.Group();
+caveInterior.position.set(300,-8,300);
+world.add(caveInterior);
+
+const caveFloor=addBox(
+ caveInterior,0,-.3,0,30,.6,30,rockMat
+);
+
+for(let i=0;i<12;i++){
+ const x=(Math.random()-.5)*25;
+ const z=(Math.random()-.5)*25;
+ const rock=makeRock(300+x,300+z,.8);
+ // Move decoration into the underground room.
+ world.remove(rock);
+ caveInterior.add(rock);
+ rock.position.set(x,.3,z);
+}
+
+const caveLight=new THREE.PointLight(0xffa34d,2.5,35);
+caveLight.position.set(0,5,0);
+caveInterior.add(caveLight);
+
+const caveExit=new THREE.Mesh(
+ new THREE.TorusGeometry(2,.2,8,20),
+ mat(0xe2c67d)
+);
+caveExit.position.set(0,1,-12);
+caveInterior.add(caveExit);
+
+/* TRADER */
+const trader=new THREE.Group();
+trader.position.set(8,.25,8);
+world.add(trader);
+
+addBox(trader,0,1,0,.75,1.4,.65,mat(0x4a8c65));
+addSphere(trader,0,1.9,0,.38,mat(0xe5b78c));
+addBox(trader,0,2.45,0,1.2,.15,1.2,woodMat);
+
+/* BOAT */
+const boat=new THREE.Group();
+boat.visible=false;
+world.add(boat);
+
+addBox(boat,0,.1,0,2.5,.4,4,woodMat);
+addBox(boat,0,.8,0,.15,1.4,.15,mat(0xe9e4d0));
 
 /* CREATURES */
 const enemies=[];
@@ -429,97 +720,67 @@ const animals=[];
 
 function createCreature(x,z,isEnemy){
  const group=new THREE.Group();
- const creatureMaterial=material(
-  isEnemy?0xb93b34:0xe2c58c
- );
+ const creatureMat=mat(isEnemy?0xa93632:0xd8bd83);
 
- makeBox(group,0,.65,0,.9,.7,.55,creatureMaterial);
+ addBox(group,0,.65,0,.9,.7,.65,creatureMat);
+ addSphere(group,0,1.05,.35,.3,creatureMat);
 
- const head=new THREE.Mesh(
-  new THREE.SphereGeometry(.28,10,8),creatureMaterial
- );
- head.position.set(0,1.05,.35);
- group.add(head);
-
- for(const xPos of [-.28,.28]){
-  makeBox(group,xPos,.2,-.1,.16,.4,.18,material(0x554333));
+ for(const side of [-1,1]){
+  addBox(group,side*.27,.2,-.1,.17,.4,.18,woodMat);
  }
 
- group.position.set(x,.5,z);
  world.add(group);
+ group.position.set(x,.25,z);
 
- const item={
+ const creature={
   mesh:group,
-  hp:isEnemy?45:15,
+  hp:isEnemy?50:15,
   alive:true,
   phase:Math.random()*10
  };
 
- (isEnemy?enemies:animals).push(item);
+ (isEnemy?enemies:animals).push(creature);
 }
 
-for(let i=0;i<7;i++){
- const p=randomPoint(18);
+for(let i=0;i<8;i++){
+ const p=pointOnIsland(0,0,20);
  createCreature(p.x,p.z,false);
 }
 for(let i=0;i<5;i++){
- const p=randomPoint(17);
+ const p=pointOnIsland(0,0,18);
  createCreature(p.x,p.z,true);
 }
 
-/* CAVE */
-const cave=new THREE.Group();
-cave.position.set(-10,.5,-17);
-world.add(cave);
-
-const caveRock=new THREE.Mesh(
- new THREE.DodecahedronGeometry(3,1),rockMaterial
-);
-caveRock.scale.set(1.5,1,1);
-cave.add(caveRock);
-
-const caveHole=new THREE.Mesh(
- new THREE.CircleGeometry(1.1,16),material(0x10151a)
-);
-caveHole.position.set(0,.2,2.55);
-cave.add(caveHole);
-
-/* TRADER */
-const trader=new THREE.Group();
-trader.position.set(7,.5,6);
-world.add(trader);
-
-makeBox(trader,0,1,0,.7,1.5,.6,material(0x4a8c65));
-
-const traderHead=new THREE.Mesh(
- new THREE.SphereGeometry(.4,12,10),material(0xe5b78c)
-);
-traderHead.position.y=2;
-trader.add(traderHead);
-makeBox(trader,0,2.7,0,1.2,.15,1.2,woodMaterial);
-
-/* BUILDING VISUALS */
-function displayBuilding(id,data){
+/* BUILDINGS */
+function showBuilding(id,data){
  if(!data||buildingMeshes.has(id))return;
 
- const mesh=makeBox(
-  world,data.x,.95,data.z,3,1.9,.35,woodMaterial
- );
+ let mesh;
+
+ if(data.type==="house"){
+  mesh=addBox(world,data.x,1.2,data.z,4,2.4,4,woodMat);
+  const roof=addBox(world,data.x,2.8,data.z,4.5,.3,4.5,mat(0x80442d));
+  buildingMeshes.set(id,roof);
+ }else if(data.type==="wall"){
+  mesh=addBox(world,data.x,1,data.z,3,2,.35,woodMat);
+ }else{
+  mesh=addBox(world,data.x,.5,data.z,1.4,1,1.4,mat(0x555555));
+ }
  mesh.rotation.y=data.rotation||0;
  buildingMeshes.set(id,mesh);
 }
 
 /* HUD */
 function updateHUD(){
- $("health").textContent=Math.max(0,Math.round(health));
- $("hunger").textContent=Math.max(0,Math.round(hunger));
+ $("health").textContent=Math.round(health);
+ $("hunger").textContent=Math.round(hunger);
  $("wood").textContent=wood;
  $("stone").textContent=stone;
  $("food").textContent=food;
  $("playerStatus").textContent=playerName+" · "+roomCode;
 }
 
-/* ONLINE ROOM */
+/* ONLINE MULTIPLAYER */
 function generateRoomCode(){
  return Math.random().toString(36).substring(2,8).toUpperCase();
 }
@@ -528,6 +789,24 @@ async function startRoom(code,createNew){
  if(!user){
   showError("Please sign in first.");
   return;
+ }
+
+ if(user.email&&!user.emailVerified){
+  try{
+   await reload(user);
+  }catch(e){
+   showError("Could not check email verification.");
+   return;
+  }
+
+  if(!user.emailVerified){
+   try{
+    await sendEmailVerification(user);
+   }catch(e){console.log(e);}
+
+   showError("Verify your email before joining. Check your inbox and spam folder.");
+   return;
+  }
  }
 
  playerName=(
@@ -549,10 +828,7 @@ async function startRoom(code,createNew){
   }
 
   roomCode=code;
-
-  playerRef=ref(
-   db,"rooms/"+roomCode+"/players/"+user.uid
-  );
+  playerRef=ref(db,"rooms/"+roomCode+"/players/"+user.uid);
 
   await set(playerRef,{
    name:playerName,
@@ -569,24 +845,21 @@ async function startRoom(code,createNew){
     ref(db,"rooms/"+roomCode+"/world/resources"),
     generateResources()
    );
-
-   await set(
-    ref(db,"rooms/"+roomCode+"/world/buildings"),
-    {}
-   );
   }
 
   connectRoom();
 
   playing=true;
+  player.position.set(0,.25,0);
   $("screen").style.display="none";
   showError("");
   updateHUD();
-  toast("Island ready! Room code: "+roomCode);
+
+  toast("Island created! Code: "+roomCode);
 
  }catch(e){
   console.error(e);
-  showError("Room connection failed: "+explainError(e));
+  showError("Island connection failed: "+explainError(e));
  }
 }
 
@@ -609,23 +882,15 @@ function connectRoom(){
 
    if(!remote){
     const group=new THREE.Group();
-
-    makeBox(group,0,1.05,0,.8,1.2,.45,material(0x9b65d8));
-
-    const head=new THREE.Mesh(
-     new THREE.SphereGeometry(.36,12,10),
-     material(0xe8b98c)
-    );
-    head.position.y=1.9;
-    group.add(head);
-
+    addBox(group,0,1.15,0,.85,1.15,.5,mat(0x9b65d8));
+    addSphere(group,0,1.95,0,.38,mat(0xe8b98c));
     world.add(group);
     remote={mesh:group};
     remoteMeshes.set(id,remote);
    }
 
    remote.mesh.position.set(
-    Number(p.x)||0,.5,Number(p.z)||0
+    Number(p.x)||0,.25,Number(p.z)||0
    );
    remote.mesh.rotation.y=Number(p.rotation)||0;
   }
@@ -642,11 +907,11 @@ function connectRoom(){
   const data=snapshot.val()||{};
 
   for(const [id,item] of Object.entries(data.resources||{})){
-   displayResource(id,item);
+   showResource(id,item);
   }
 
   for(const [id,item] of Object.entries(data.buildings||{})){
-   displayBuilding(id,item);
+   showBuilding(id,item);
   }
  });
 
@@ -675,53 +940,48 @@ function connectRoom(){
  });
 }
 
-/* SHARED RESOURCE COLLECTION */
+/* COLLECT RESOURCES */
 async function collect(){
  if(!playing)return;
 
  let nearestId=null;
- let nearest=null;
- let distance=3.3;
+ let distance=3.7;
 
  for(const [id,mesh] of resourceMeshes){
   if(!mesh.visible)continue;
 
   const d=player.position.distanceTo(mesh.position);
+
   if(d<distance){
    distance=d;
    nearestId=id;
-   nearest=mesh;
   }
  }
 
  if(nearestId){
-  const resourceRef=ref(
-   db,"rooms/"+roomCode+"/world/resources/"+nearestId
-  );
-
   try{
-   let collected=null;
+   const resourceRef=ref(
+    db,"rooms/"+roomCode+"/world/resources/"+nearestId
+   );
 
    const result=await runTransaction(resourceRef,current=>{
-    if(!current||!current.amount||current.amount<=0)return;
-
-    collected={
-     type:current.type,
-     amount:current.amount
-    };
-
+    if(!current||current.amount<=0)return;
     return {...current,amount:0};
    });
 
-   if(result.committed&&collected){
-    if(collected.type==="wood")wood+=collected.amount;
-    else stone+=collected.amount;
+   if(result.committed){
+    const item=result.snapshot.val();
 
-    nearest.visible=false;
+    if(item.type==="wood")wood+=3;
+    else stone+=2;
+
+    const mesh=resourceMeshes.get(nearestId);
+    if(mesh)mesh.visible=false;
+
     updateHUD();
-    toast("Collected "+collected.amount+" "+collected.type+"!");
+    toast("Collected "+item.type+"!");
    }else{
-    toast("Someone already collected that resource.");
+    toast("Someone already collected that.");
    }
   }catch(e){
    toast("Collection failed: "+explainError(e));
@@ -748,12 +1008,12 @@ async function collect(){
  toast("Nothing nearby to collect.");
 }
 
-/* SHARED BUILDING */
+/* BUILDING */
 async function buildWall(){
  if(!playing)return;
 
  if(wood<4){
-  toast("You need 4 wood to build a wall.");
+  toast("You need 4 wood.");
   return;
  }
 
@@ -767,8 +1027,7 @@ async function buildWall(){
   await set(
    ref(db,"rooms/"+roomCode+"/world/buildings/"+id),
    {
-    type:"wall",
-    x,z,
+    type:"wall",x,z,
     rotation:player.rotation.y,
     owner:user.uid
    }
@@ -776,7 +1035,7 @@ async function buildWall(){
 
   wood-=4;
   updateHUD();
-  toast("Wall built and shared!");
+  toast("Wall built!");
  }catch(e){
   toast("Building failed: "+explainError(e));
  }
@@ -787,12 +1046,12 @@ function attack(){
  if(!playing)return;
 
  let target=null;
- let distance=3.4;
+ let distance=3.5;
 
  for(const enemy of enemies){
   if(!enemy.alive)continue;
-  const d=player.position.distanceTo(enemy.mesh.position);
 
+  const d=player.position.distanceTo(enemy.mesh.position);
   if(d<distance){
    target=enemy;
    distance=d;
@@ -825,31 +1084,55 @@ function eat(){
 
  food--;
  hunger=Math.min(100,hunger+25);
- health=Math.min(100,health+8);
+ health=Math.min(100,health+10);
  updateHUD();
  toast("You ate food.");
 }
 
+/* BOAT */
 function toggleBoat(){
+ if(!playing)return;
+
  inBoat=!inBoat;
+ boat.visible=inBoat;
  speed=inBoat?10:7;
- toast(inBoat?"Boat mode enabled.":"You left your boat.");
+
+ boat.position.copy(player.position);
+ toast(inBoat?"Boat mode enabled!":"Boat mode disabled.");
 }
 
+/* CAVE */
 function toggleCave(){
- if(!inCave&&player.position.distanceTo(cave.position)>7){
-  toast("Find the cave first.");
-  return;
- }
+ if(!playing)return;
 
- inCave=!inCave;
+ if(!inCave){
+  let nearest=null;
+  let distance=8;
 
- if(inCave){
-  player.position.set(-10,.5,-14);
-  if(stone<2)stone+=2;
-  toast("You entered the cave and found stone!");
+  for(const cave of caves){
+   const d=player.position.distanceTo(
+    new THREE.Vector3(cave.x,.25,cave.z)
+   );
+
+   if(d<distance){
+    distance=d;
+    nearest=cave;
+   }
+  }
+
+  if(!nearest){
+   toast("Find a cave entrance first.");
+   return;
+  }
+
+  inCave=true;
+  player.position.set(300,.25,300);
+  camera.position.set(300,8,310);
+  stone+=3;
+  toast("You entered a cave! +3 stone.");
  }else{
-  player.position.set(-10,.5,-12);
+  inCave=false;
+  player.position.set(-12,.25,-17);
   toast("You left the cave.");
  }
 
@@ -860,24 +1143,48 @@ function toggleCave(){
 function openShop(){
  const choice=prompt(
   "ISLAND TRADER\n"+
-  "1 - Buy 5 food (cost: 5 wood)\n"+
-  "2 - Buy 5 wood (cost: 5 stone)\n"+
-  "3 - Cancel"
+  "1 - Buy 5 food (5 wood)\n"+
+  "2 - Buy 5 wood (5 stone)\n"+
+  "3 - Buy house (12 wood, 5 stone)\n"+
+  "4 - Cancel"
  );
 
  if(choice==="1"&&wood>=5){
   wood-=5;
   food+=5;
-  toast("Bought 5 food.");
+  toast("Bought food!");
  }else if(choice==="2"&&stone>=5){
   stone-=5;
   wood+=5;
-  toast("Bought 5 wood.");
- }else if(choice==="1"||choice==="2"){
+  toast("Bought wood!");
+ }else if(choice==="3"&&wood>=12&&stone>=5){
+  wood-=12;
+  stone-=5;
+  buildHouse();
+ }else if(choice!=="4"&&choice){
   toast("Not enough resources.");
  }
 
  updateHUD();
+}
+
+async function buildHouse(){
+ const id=push(
+  ref(db,"rooms/"+roomCode+"/world/buildings")
+ ).key;
+
+ const x=player.position.x+4;
+ const z=player.position.z+4;
+
+ try{
+  await set(
+   ref(db,"rooms/"+roomCode+"/world/buildings/"+id),
+   {type:"house",x,z,rotation:0,owner:user.uid}
+  );
+  toast("House built!");
+ }catch(e){
+  toast("House could not be built: "+explainError(e));
+ }
 }
 
 function inventory(){
@@ -965,9 +1272,7 @@ $("leaveBtn").onclick=async()=>{
  remoteMeshes.clear();
 
  $("screen").style.display="flex";
- $("worldMenu").style.display="block";
  $("chatMessages").replaceChildren();
-
  toast("You left the island.");
 };
 
@@ -975,6 +1280,8 @@ $("leaveBtn").onclick=async()=>{
 const keys={};
 
 addEventListener("keydown",e=>{
+ if(e.target instanceof HTMLInputElement)return;
+
  keys[e.key.toLowerCase()]=true;
 
  if(e.key===" "){
@@ -994,6 +1301,7 @@ addEventListener("keyup",e=>{
 /* MOBILE JOYSTICK */
 const joystick=$("joystick");
 const stick=$("stick");
+
 let joy={x:0,y:0};
 let joyPointer=null;
 
@@ -1011,6 +1319,7 @@ function moveJoystick(e){
  const rect=joystick.getBoundingClientRect();
  let dx=e.clientX-(rect.left+rect.width/2);
  let dy=e.clientY-(rect.top+rect.height/2);
+
  const max=42;
  const length=Math.hypot(dx,dy);
 
@@ -1062,17 +1371,19 @@ function gameTick(dt){
   player.rotation.y=Math.atan2(mx,mz);
  }
 
- const maxDistance=105;
- const distance=Math.hypot(
-  player.position.x,player.position.z
- );
+ // Keep player on the visible world.
+ if(!inCave){
+  const distance=Math.hypot(
+   player.position.x,player.position.z
+  );
 
- if(distance>maxDistance){
-  player.position.x*=maxDistance/distance;
-  player.position.z*=maxDistance/distance;
+  if(distance>110){
+   player.position.x*=110/distance;
+   player.position.z*=110/distance;
+  }
  }
 
- /* ENEMY AI */
+ // Enemy movement.
  for(const enemy of enemies){
   if(!enemy.alive)continue;
 
@@ -1080,72 +1391,89 @@ function gameTick(dt){
   const dz=player.position.z-enemy.mesh.position.z;
   const d=Math.hypot(dx,dz);
 
-  if(d<16&&d>1.4){
-   enemy.mesh.position.x+=dx/d*2.1*dt;
-   enemy.mesh.position.z+=dz/d*2.1*dt;
+  if(d<16&&d>1.4&&!inCave){
+   enemy.mesh.position.x+=dx/d*2*dt;
+   enemy.mesh.position.z+=dz/d*2*dt;
    enemy.mesh.rotation.y=Math.atan2(dx,dz);
   }
 
-  if(d<1.5&&performance.now()-lastDamage>900){
+  if(d<1.5&&performance.now()-lastDamage>900&&!inCave){
    health-=8;
    lastDamage=performance.now();
 
    if(health<=0){
     health=100;
-    player.position.set(0,.5,0);
+    player.position.set(0,.25,0);
     toast("You were defeated and respawned!");
    }
   }
  }
 
- /* ANIMALS */
+ // Animals wander around.
  for(const animal of animals){
   if(!animal.alive)continue;
+
   animal.phase+=dt;
-  animal.mesh.position.x+=Math.sin(animal.phase)*dt*.5;
-  animal.mesh.position.z+=Math.cos(animal.phase*.8)*dt*.5;
+  animal.mesh.position.x+=Math.sin(animal.phase)*dt*.45;
+  animal.mesh.position.z+=Math.cos(animal.phase*.8)*dt*.45;
  }
 
- /* HUNGER */
- hunger=Math.max(0,hunger-dt*.45);
+ // Hunger and health.
+ hunger=Math.max(0,hunger-dt*.35);
 
  if(hunger<=0){
-  health=Math.max(0,health-dt*1.8);
+  health=Math.max(0,health-dt*1.5);
  }
 
  if(health<=0){
   health=100;
   hunger=60;
-  player.position.set(0,.5,0);
-  toast("You ran out of health. You respawned.");
+  player.position.set(0,.25,0);
+  toast("You respawned.");
  }
 
- /* CAMERA */
- const target=new THREE.Vector3(
-  player.position.x,
-  player.position.y+7,
-  player.position.z+10
+ // Boat follows player.
+ if(inBoat){
+  boat.position.copy(player.position);
+  boat.rotation.y=player.rotation.y;
+ }
+
+ // Camera follows the player from behind.
+ const behind= new THREE.Vector3(
+  Math.sin(player.rotation.y)*9,
+  7,
+  Math.cos(player.rotation.y)*9
  );
 
- camera.position.lerp(target,Math.min(1,dt*4));
+ const target=new THREE.Vector3(
+  player.position.x+behind.x,
+  player.position.y+behind.y,
+  player.position.z+behind.z
+ );
+
+ camera.position.lerp(target,Math.min(1,dt*5));
+
  camera.lookAt(
   player.position.x,
   player.position.y+1,
   player.position.z
  );
 
- /* DAY AND NIGHT */
- elapsed+=dt;
- const day=(Math.sin(elapsed*.035)+1)/2;
+ player.visible=true;
 
- sun.intensity=.35+day*2.2;
- scene.background=new THREE.Color().setHSL(
-  .55,.48,.16+day*.42
+ // Day and night.
+ elapsed+=dt;
+ const daylight=(Math.sin(elapsed*.025)+1)/2;
+
+ sun.intensity=.45+daylight*2;
+ scene.background.setHSL(
+  .55,.5,.18+daylight*.4
  );
  scene.fog.color.copy(scene.background);
- water.position.y=-.7+Math.sin(elapsed)*.035;
 
- /* SEND POSITION */
+ water.position.y=-.2+Math.sin(elapsed)*.025;
+
+ // Multiplayer position sync.
  if(playerRef&&performance.now()-lastSend>200){
   lastSend=performance.now();
 
@@ -1177,7 +1505,7 @@ addEventListener("resize",()=>{
 });
 
 updateHUD();
-console.log("Survival Island loaded successfully.");
+console.log("Survival Island 4.0 loaded.");
 </script>
 </body>
 </html>
